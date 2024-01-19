@@ -1,0 +1,44 @@
+version: '3'
+services:
+  #POSTGRES DATABASE FOR INVENTORY
+  db-invetory:
+    container_name: db-inventory
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms_inventory
+      POSTGRES_USER: Juanem
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5431:5431
+    expose:
+      - 5431
+    command: -p 5431
+  #MYSQL DATABASE FOR ORDERS
+  db-orders:
+    container_name: db-orders
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ms_orders
+      MYSQL_USER: Juanem
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+  #POSTGRES DATABASE FOR PRODUCTS
+  db-products:
+    container_name: db-products
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms_products
+      POSTGRES_USER: Juanem
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    command: -p 5432
