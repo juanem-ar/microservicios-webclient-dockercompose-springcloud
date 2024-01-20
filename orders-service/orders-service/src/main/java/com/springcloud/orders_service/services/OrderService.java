@@ -19,11 +19,9 @@ public class OrderService {
 
     public void placeOrder(OrderRequest orderRequest){
 
-        //TODO Chequear stock antes de crear la orden consultando al  microservicio de inventario
-
         BaseResponse result = this.webClientBuilder.build()
                 .post()
-                .uri("http://localhost:8080/api/inventory/in-stock")
+                .uri("lb://inventory-service/api/inventory/in-stock")
                 .bodyValue(orderRequest.getOrderItems())
                 .retrieve()
                 .bodyToMono(BaseResponse.class)
