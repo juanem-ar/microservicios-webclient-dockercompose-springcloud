@@ -8,7 +8,9 @@ Tecnologías aplicadas
 - Spring Cloud Gateway
 - WebClient
 - Eureka Netflix
-- Spring Security con Auth Server KEYCLOAK
+- Spring Security
+- Auth Server Keycloak
+- Resilience4j - CircuitBreaker
 
 Estructura del Proyecto
 
