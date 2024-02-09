@@ -7,6 +7,8 @@ import com.springcloud.orders_service.model.entities.OrderItems;
 import com.springcloud.orders_service.model.enums.OrderStatus;
 import com.springcloud.orders_service.repositories.OrderRepository;
 import com.springcloud.orders_service.utils.JsonUtils;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -21,32 +23,37 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObservationRegistry observationRegistry;
 
     public OrderResponse placeOrder(OrderRequest orderRequest){
+        //TODO vamos a querer observar esta comunicacion sincronica
+        Observation inventory = Observation.createNotStarted("inventory-service", observationRegistry);
 
-        BaseResponse result = this.webClientBuilder.build()
-                .post()
-                .uri("lb://inventory-service/api/inventory/in-stock")
-                .bodyValue(orderRequest.getOrderItems())
-                .retrieve()
-                .bodyToMono(BaseResponse.class)
-                .block();
+        return inventory.observe(() -> {
+            BaseResponse result = this.webClientBuilder.build()
+                    .post()
+                    .uri("lb://inventory-service/api/inventory/in-stock")
+                    .bodyValue(orderRequest.getOrderItems())
+                    .retrieve()
+                    .bodyToMono(BaseResponse.class)
+                    .block();
 
-        if(result != null && !result.hasErrors()) {
-            Order order = new Order();
-            order.setOrderNumber(UUID.randomUUID().toString());
-            order.setOrderItems(orderRequest.getOrderItems().stream()
-                    .map(orderItemRequest -> mapOrderItemRequestToOrderItem(orderItemRequest, order))
-                    .toList());
-            var orderSaved = this.orderRepository.save(order);
-            //TODO SEND MESSAGE TO ORDER TOPIC
-            this.kafkaTemplate.send("orders-topic", JsonUtils.toJson(
-                    new OrderEvent(orderSaved.getOrderNumber(), orderSaved.getOrderItems().size(), OrderStatus.PLACED)
-            ));
-            return mapToOrderResponse(orderSaved);
-        }else{
-            throw new IllegalArgumentException("Some of the products are not in stock");
-        }
+            if(result != null && !result.hasErrors()) {
+                Order order = new Order();
+                order.setOrderNumber(UUID.randomUUID().toString());
+                order.setOrderItems(orderRequest.getOrderItems().stream()
+                        .map(orderItemRequest -> mapOrderItemRequestToOrderItem(orderItemRequest, order))
+                        .toList());
+                var orderSaved = this.orderRepository.save(order);
+                //TODO SEND MESSAGE TO ORDER TOPIC
+                this.kafkaTemplate.send("orders-topic", JsonUtils.toJson(
+                        new OrderEvent(orderSaved.getOrderNumber(), orderSaved.getOrderItems().size(), OrderStatus.PLACED)
+                ));
+                return mapToOrderResponse(orderSaved);
+            }else{
+                throw new IllegalArgumentException("Some of the products are not in stock");
+            }
+        });
     }
 
     private OrderItems mapOrderItemRequestToOrderItem(OrderItemRequest orderItemRequest, Order order) {

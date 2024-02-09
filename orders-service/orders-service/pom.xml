@@ -30,12 +30,14 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<!-- SECURITY END-->
+
 		<!-- RESILIENCE4J-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 		</dependency>
 		<!-- RESILIENCE4J END-->
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -44,10 +46,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!-- Reactive web-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
+		<!-- Reactive web END-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -80,6 +84,25 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 		<!-- KAFKA END-->
+		<!-- DEPENDENCIAS DE MONITOREO DE SERVICIOS Y SEGUIMIENTO DE LLAMADAS -->
+		<!-- TRACING BEGIN -->
+		<!-- permite integrar micrometer con bread, una biblioteca de rastreo distribuido utilizada para implementar la especificacion de openTracing y zinpkin. Permite que las trazas generadas sean utilizadas por sistemas de rastreo como zipking. esto permite mayor visibilidad de como se propagan las solicitudes a travez de la aplicacion-->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+		<!-- Sistema de monitoreo y alerta de codigo (ABIERTO) -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<!-- biblioteca que permite que las trazas generadas por brave, se envien y reporten al servidor de zipkin. Este ultimo tambien las va a almacenar.-->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+			<version>2.16.4</version>
+		</dependency>
+		<!-- TRACING END -->
 	</dependencies>
 
 	<build>
